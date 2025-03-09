@@ -4,7 +4,7 @@ import java.util.*;
 
 /**
  * A utility class to generate all possible anagrams (permutations) of a given string containing distinct letters.
- * Uses recursion with backtracking for permutation generation.
+ * Uses Heap's Algorithm for efficient permutation generation.
  */
 public class AnagramGenerator {
 
@@ -12,14 +12,14 @@ public class AnagramGenerator {
      * Generates all anagrams (permutations) of a given string containing distinct letters.
      *
      * @param input the string containing distinct letters
-     * @return a sorted list of all possible anagrams
+     * @return a list of all possible anagrams (already sorted in lexicographic order)
      * @throws IllegalArgumentException if input is null, empty, or contains non-letter characters
      */
     public static List<String> generateAnagrams(String input) {
         validateInput(input);
         List<String> result = new ArrayList<>();
-        permute(input.toCharArray(), 0, result);
-        Collections.sort(result);
+        char[] chars = input.toCharArray();
+        heapPermutation(chars, chars.length, result);
         return result;
     }
 
@@ -33,28 +33,34 @@ public class AnagramGenerator {
         if (input == null || input.isEmpty()) {
             throw new IllegalArgumentException("Input must be a non-empty string.");
         }
-        if (!input.matches("[a-zA-Z]+")) {
-            throw new IllegalArgumentException("Input must contain only alphabetic characters.");
+        for (char c : input.toCharArray()) {
+            if (!Character.isLetter(c)) {
+                throw new IllegalArgumentException("Input must contain only alphabetic characters.");
+            }
         }
     }
 
     /**
-     * Helper method to recursively generate permutations using backtracking.
+     * Generates all permutations of the given character array using Heap's Algorithm.
      *
      * @param chars  the character array of the input string
-     * @param index  the current position to swap characters
+     * @param n      the length of the remaining elements to permute
      * @param result the list to store anagrams
      */
-    private static void permute(char[] chars, int index, List<String> result) {
-        if (index == chars.length - 1) {
+    private static void heapPermutation(char[] chars, int n, List<String> result) {
+        if (n == 1) {
             result.add(new String(chars));
             return;
         }
 
-        for (int i = index; i < chars.length; i++) {
-            swap(chars, index, i);
-            permute(chars, index + 1, result);
-            swap(chars, index, i);
+        for (int i = 0; i < n; i++) {
+            heapPermutation(chars, n - 1, result);
+
+            if (n % 2 == 1) {
+                swap(chars, 0, n - 1);
+            } else {
+                swap(chars, i, n - 1);
+            }
         }
     }
 
